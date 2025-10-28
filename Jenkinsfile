@@ -2,26 +2,9 @@ pipeline {
     agent any
 
     stages {
-        // stage('Build') {
-        //     agent {
-        //         docker {
-        //             image 'node:18-alpine'
-        //             reuseNode true
-        //         }
-        //     }
-        //     steps {
-        //         sh '''
-        //             echo "📦 Starting Build Stage..."
-        //             ls -la
-        //             node --version
-        //             npm --version
-        //             npm ci
-        //             npm run build
-        //         '''
-        //     }
-        // }
+        /*
 
-        stage('Test') {
+        stage('Build') {
             agent {
                 docker {
                     image 'node:18-alpine'
@@ -30,35 +13,55 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "🧪 Starting Test Stage..."
-                    npm test || echo "Tests failed but continuing..."
+                    ls -la
+                    node --version
+                    npm --version
+                    npm ci
+                    npm run build
+                    ls -la
+                '''
+            }
+        }
+        */
+
+        stage('Test') {
+            agent {
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
+                }
+            }
+
+            steps {
+                sh '''
+                    #test -f build/index.html
+                    npm test
                 '''
             }
         }
 
-      stage('E2E') {
-    agent {
-        docker {
-            image 'mcr.microsoft.com/playwright:v1.39.0-noble'
-            reuseNode true
-        }
-    }
-    steps {
-        sh '''
-            echo "🎭 Starting E2E Tests..."
-            npm install -g serve
-            serve -s build &
-            npx playwright test
-        '''
-    }
-}
+        stage('E2E') {
+            agent {
+                docker {
+                    image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+                    reuseNode true
+                }
+            }
 
+            steps {
+                sh '''
+                    npm install serve
+                    node_modules/.bin/serve -s build &
+                    sleep 10
+                    npx playwright test
+                '''
+            }
+        }
     }
 
     post {
         always {
-            echo "🧹 Cleaning up and publishing test results..."
-            junit allowEmptyResults: true, testResults: 'jest-result/junit.xml'
+            junit 'jest-results/junit.xml'
         }
     }
 }
