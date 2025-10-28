@@ -36,6 +36,21 @@ pipeline {
                     npm test || echo "Tests failed but continuing..."
                 '''
             }
+        
+        stage('E2E') {
+            agent {
+                docker {
+                    image 'docker pull mcr.microsoft.com/playwright:v1.56.1-noble'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                    npm install serve
+                    node_modules\serve -s build
+                    npx playwright test
+                '''
+            }
         }
     }
 
