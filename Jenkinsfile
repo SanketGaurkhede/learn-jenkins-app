@@ -93,7 +93,7 @@ pipeline {
 
             echo "Deploying to Netlify site: $NETLIFY_SITE_ID"
             npx netlify status --auth $NETLIFY_AUTH_TOKEN
-            npx netlify deploy --dir=build --prod --auth $NETLIFY_AUTH_TOKEN --site $NETLIFY_SITE_ID
+            
         '''
     }
 }
