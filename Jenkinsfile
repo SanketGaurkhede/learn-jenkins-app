@@ -51,31 +51,37 @@ pipeline {
                 }
 
                 stage('E2E') {
-                    agent {
-                        docker {
-                            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
-                            reuseNode true
-                        }
-                    }
-                    steps {
-                        sh '''
-                            echo "🎭 Running Playwright E2E tests..."
-                            npm install serve
-                            npx serve -s build &
-                            sleep 10
-                            npx playwright test --reporter=html
-                        '''
-                    }
-                    post {
-                        always {
-                            publishHTML([
-                                reportDir: 'playwright-report',
-                                reportFiles: 'index.html',
-                                reportName: 'Playwright HTML Report'
-                            ])
-                        }
-                    }
-                }
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright:v1.39.0-jammy'
+            reuseNode true
+        }
+    }
+
+    steps {
+        sh '''
+            echo "🎭 Running Playwright E2E tests..."
+            npm install serve
+            npx serve -s build &
+            sleep 10
+            npx playwright test --reporter=html
+        '''
+    }
+
+    post {
+        always {
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: 'playwright-report',
+                reportFiles: 'index.html',
+                reportName: 'Playwright HTML Report'
+            ])
+        }
+    }
+}
+
             }
         }
 
